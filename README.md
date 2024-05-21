@@ -1,0 +1,41 @@
+<a name="QxdxE"></a>
+# CellProfiler基本使用
+CellProfiler可以用于药物筛选，利用预先定义的手工特征进行特征提取，将特征利用基本的机器学习进行拟合，精准的判断属于哪种化合物影响的细胞反应。<br />![image.png](https://cdn.nlark.com/yuque/0/2024/png/42860749/1716204602767-a8e78cd7-6ff6-4e6a-a6c7-4531413d9577.png)
+<a name="OBaw3"></a>
+# 基于明场和FRET的预处理操作
+<a name="XBOz0"></a>
+## 单细胞分割操作
+利用DD图像进行细胞区域的获取<br />![image.png](https://cdn.nlark.com/yuque/0/2024/png/42860749/1716274501125-dd5fcd0d-db86-48d2-89b3-2a709f018dd5.png)
+<a name="V5Ysy"></a>
+## 明场图像增强
+将明场按照纹理进行提取，拿到纹理信息方便后面进行信息提取<br />![image.png](https://cdn.nlark.com/yuque/0/2024/png/42860749/1716274592973-54a9350c-9fec-4797-9ee3-a253ae44fbe0.png)
+<a name="POo5b"></a>
+## Mask掩码隐蔽不需要的明场信息区域
+利用Muban的0-1区域图像屏蔽掉不需要的明场图像<br />![image.png](https://cdn.nlark.com/yuque/0/2024/png/42860749/1716274670398-5a31d169-fa44-4f2a-9258-e632e01b62a0.png)
+<a name="aQ4a3"></a>
+## 分割明场区域内的单细胞图像
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/42860749/1716274756193-8a2f8137-2f03-4b70-b4f0-94e086141c2d.png)<br />**这里的效果并不是很好，后期需要进行调整。尤其是细胞圆形过度。**
+<a name="j5sLw"></a>
+## 分割DA单细胞图像
+![image.png](https://cdn.nlark.com/yuque/0/2024/png/42860749/1716274818266-691d516c-f52c-4750-902d-cc67887fc00b.png)
+<a name="V6kVB"></a>
+## 数据测量Measure
+
+- 查看强度之间的相关性，利用分割出的明场单细胞图像与原始图像进行比对
+- 查看FRET图像之间的三个通道强度之间的相关性。
+- 输出明场细胞的中细胞区域的大小，和FRET作用效果的细胞区域大小
+- 查看荧光强度的分布情况，bin设置为4标识利用4个区间段区分荧光强度分布情况
+- 查看纹理特征，利用明场图像的单细胞内的区域变化进行查看
+<a name="sFKww"></a>
+## 需要改进的点
+
+1. 对于区域内的FRET图像存在明显的明亮的点，该区域也可以进行统计计算，细胞内明亮的点的数量，利用RelateObjects管道实现细胞区域与细胞内小亮点的囊泡之间的关系
+2. 对于分割算法的阈值还有待提高，尤其是对于明场分割的算法，纹理的阈值存在不合理的情况，有些细胞区域并没有检测到
+<a name="Rd0TK"></a>
+# 分析模型
+<a name="d5oc0"></a>
+## 数据降维TSNE
+<a name="Pmjqr"></a>
+## 标准化数据
+<a name="VHaZz"></a>
+## KNN算法
