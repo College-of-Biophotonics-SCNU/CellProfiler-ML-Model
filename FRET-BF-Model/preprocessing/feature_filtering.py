@@ -1,10 +1,11 @@
 import csv
 import pickle
 
-import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.feature_selection import SelectKBest
 from sklearn.feature_selection import chi2
 from sklearn.feature_selection import mutual_info_classif
+from upsetplot import from_contents, plot
 
 
 def remove_feature_Pearson_correlation(X, y):
@@ -50,16 +51,20 @@ def remove_feature_Mutual_Information(X, y, score=0.1):
     """
     # 计算特征与目标变量之间的互信息
     mutual_info = mutual_info_classif(X, y)
-    # 输出所有特征的互信息得分
-    feature_scores = pd.Series(mutual_info, index=X.columns)
-    print(feature_scores)
+    # # 输出所有特征的互信息得分
+    # feature_scores = pd.Series(mutual_info, index=X.columns)
     # 假设我们希望选择得分在前50%的特征
     selected_features = X.columns[mutual_info > score]
-    print(selected_features)
     return selected_features
 
 
 def compare_feature(A_filename, B_filename):
+    """
+    比较两者元数据特征之间的差异
+    :param A_filename:
+    :param B_filename:
+    :return:
+    """
     with open('../data/{}.pkl'.format(A_filename), 'rb') as f:
         loaded_A_feature = pickle.load(f)
 
@@ -92,3 +97,17 @@ def compare_feature(A_filename, B_filename):
                    common_indices[i] if i < len(common_indices) else '']
             writer.writerow(row)
 
+
+def draw_vnn(valid_feature):
+    """
+    绘制不同时间段的韦恩图
+    :return:
+    """
+    contents = {}
+    for index, value in valid_feature.items():
+        contents["{} hour feature".format(index)] = set(value)
+    # 假设你有5个集合的数据
+
+    # 使用upsetplot.plot来绘制UpSet图
+    plot(from_contents(contents), subset_size='count', show_counts=True)
+    plt.show()
