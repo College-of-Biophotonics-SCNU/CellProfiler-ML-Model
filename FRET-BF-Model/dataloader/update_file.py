@@ -38,16 +38,22 @@ def rename_and_copy_images(root_dir, output_dir, datatime, cell_line='None'):
             # 寻找第一张明场图像进行数据加载预处理
             # 定义匹配规则
             pattern = r'^image_.*\.(tif)$'
+            BF_flag = False
             # 只拿到第一张图像进行分析
             for batch_image in sorted(os.listdir(batch_folder_name)):
                 if re.match(pattern, batch_image):
+                    BF_flag = True
                     shutil.copyfile(os.path.join(batch_original_path, batch_image),
                                     os.path.join(output_dir, file_pre_new_name + "BF.tif"))
                     break
 
+            if not BF_flag:
+                print(batch_original_path, "缺少明场图像")
 
-# 调用函数并传入根目录和输出目录
-root_directory = 'D:\data\FRET_BF_image'
-output_directory = 'D:\data\image'
-curr_datatime = '20240515'
-rename_and_copy_images(root_directory, output_directory, datatime=curr_datatime, cell_line="Mcf7")
+
+if __name__ == '__main__':
+    # 调用函数并传入根目录和输出目录
+    root_directory = 'C:/Users/22806/Downloads'
+    output_directory = 'C:/Users/2806/Downloads/images'
+    curr_datatime = '20240515'
+    rename_and_copy_images(root_directory, output_directory, datatime=curr_datatime, cell_line="Mcf7")

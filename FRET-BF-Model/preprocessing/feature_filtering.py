@@ -98,16 +98,19 @@ def compare_feature(A_filename, B_filename):
             writer.writerow(row)
 
 
-def draw_vnn(valid_feature):
+def draw_vnn(valid_feature, file_name):
     """
     绘制不同时间段的韦恩图
     :return:
     """
     contents = {}
     for index, value in valid_feature.items():
+        if len(value) == 0:
+            continue
         contents["{} hour feature".format(index)] = set(value)
     # 假设你有5个集合的数据
 
     # 使用upsetplot.plot来绘制UpSet图
     plot(from_contents(contents), subset_size='count', show_counts=True)
+    plt.savefig(file_name)
     plt.show()
