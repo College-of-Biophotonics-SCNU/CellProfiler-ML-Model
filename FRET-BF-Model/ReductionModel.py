@@ -2,15 +2,12 @@ import pickle
 
 import numpy as np
 import umap
-import pandas as pd
 import matplotlib.pyplot as plt
-from pandas import DataFrame
 from sklearn.manifold import TSNE
 
 import preprocessing.feature_filtering as ff
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from dataloader.read_data import read_hour
 from multiprocesser.Parallel import Parallel
+from DataloaderModel import DataloaderModel
 
 
 def screen_feature(X, y, method="Mutual_Information"):
@@ -65,58 +62,18 @@ def filter_with_all_feature(pkl_name=None):
     return set_union
 
 
-class UMAPModel:
+class UMAPModel(DataloaderModel):
     def __init__(self, metadata_file):
         # 初始化 MinMaxScaler
-        self.scaler = MinMaxScaler()
+        super().__init__()
+        # TODO 这里的归一化操作可能对于UMAP模型无效
         self.Parallel = Parallel()  # 多线程处理类
         self.X = None  # metadata 中所有的特征数据
         self.y = None  # metadata 中的label标签，是一个组合标签为 时间和control组合
         self.hours = None  # 记录多少个时间序列
         self.embedding = None  # 归一化后的特征数据
         self.X_valid_feature = {}  # X的有效特征
-        self.pre_data(metadata_file)
-
-    def pre_data(self, metadata_file):
-        """
-        预先加载程序，加载csv文件元数据
-        :param metadata_file:
-        :return:
-        """
-        # 查看是否为多文件加载
-        merged_df = {}
-        for i in range(len(metadata_file)):
-            new_merged = pd.read_csv(metadata_file[i])
-            print(f"文件 {i} 的大小为 {new_merged.shape}")
-            if i == 0:
-                merged_df = new_merged
-                continue
-            else:
-                new_merged = new_merged.filter(regex='^(?!Metadata_)')
-            merged_df = merged_df.merge(new_merged, on=['ImageNumber', 'ObjectNumber'])
-        merged_df.drop(
-            ['ImageNumber', 'ObjectNumber'],
-            axis=1, inplace=True)
-        # 异常值处理操作 对于存在异常值的数值直接去除
-        merged_df.dropna(axis=1, how='all', inplace=True)
-        merged_df.dropna(inplace=True)
-        merged_df.reset_index(drop=True, inplace=True)
-        print("metadata数据大小为 ", merged_df.shape)
-        # 进行数据划分 按照 hours 进行数据的划分
-        self.hours = read_hour(merged_df)
-        print("总共具有{}种时序的数据".format(len(self.hours)))
-        # 对于数据进行划分划分为 X 与 y 数据，也就是细胞特征与label
-        self.y = merged_df[['Metadata_hour', 'Metadata_label']]
-        self.X = merged_df.filter(regex='^(?!Metadata_)')
-
-        print("y的特征矩阵类型", self.y.shape)
-        # 这里对于数据进行归一化操作，TODO 需要注意的是对于 所有数据归一化还是单独小时的数据进行划分
-        numeric_data = self.X.select_dtypes(include=['int64', 'float64'])
-        # 对数值型特征进行拟合和转换
-        scaled_data = self.scaler.fit_transform(numeric_data)
-        # 将结果转换回DataFrame（如果需要）
-        self.X = pd.DataFrame(scaled_data, columns=numeric_data.columns)
-        print("X的特征矩阵类型", self.X.shape)
+        self.data_by_hour_split(metadata_file, self.scaler)
 
     def screen_with_hour(self, pkl_name='20240515_fret_feature'):
         """
@@ -135,7 +92,8 @@ class UMAPModel:
         with open(pkl_name, 'wb') as f:
             pickle.dump(self.X_valid_feature, f)
 
-    def filter_all_and_draw_UAMP(self, save_img, pkl_name=None, control=False, hours=[], only_control=False, use_model="UMAP"):
+    def filter_all_and_draw_UAMP(self, save_img, pkl_name=None, control=False, hours=[], only_control=False,
+                                 use_model="UMAP"):
         """
         获取特征的并集 实现所有小时的 UMAP 图像
         :param use_model: 

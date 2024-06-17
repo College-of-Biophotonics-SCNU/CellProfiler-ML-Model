@@ -9,6 +9,12 @@ import pickle
 
 # 绘制韦恩图进行特征值之间的比对
 def compare_valid_feature_setup(filename, save_filename):
+    """
+    比较两个文件之间的有效数据的交集
+    :param filename: 读取文件
+    :param save_filename: 保存文件
+    :return:
+    """
     with open(filename, 'rb') as f:
         loaded_obj = pickle.load(f)
     feature_filtering.draw_vnn(loaded_obj, save_filename)
@@ -16,7 +22,7 @@ def compare_valid_feature_setup(filename, save_filename):
 
 def record_valid_feature(filename, save_filename):
     """
-    记录有效特征数据
+    记录有效特征数据，利用 Upset 图进行绘制操作
     :param filename:
     :param save_filename:
     :return:
