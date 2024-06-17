@@ -28,8 +28,8 @@ class AnalysisModel(DataloaderModel):
             knn = KNeighborsClassifier()
             y = self.X.loc[self.X['Metadata_hour'] == hour, ['Metadata_label']]
             X = self.X.iloc[y.index].drop(['Metadata_hour', 'Metadata_label'], axis=1)
-            categories.append(f'{hour} hour')
-            print(f"{hour} 小时的数据有 {X.shape, y.shape}")
+            categories.append('{} hour'.format(hour))
+            print("{} 小时的数据有 {}".format(hour, (X.shape, y.shape)))
             X_train, X_test, y_train, y_test = split_data(X, y.to_numpy().reshape(-1))
             # 设置对应的归一化操作，便于KNN进行分析
             if scaler == "StandardScaler":
