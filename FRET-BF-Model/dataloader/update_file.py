@@ -29,12 +29,13 @@ def rename_and_copy_images(root_dir, output_dir, datatime, cell_line='None'):
                             os.path.join(output_dir, file_pre_new_name + "DA.tif"))
             shutil.copyfile(os.path.join(batch_original_path, "DD.tif"),
                             os.path.join(output_dir, file_pre_new_name + "DD.tif"))
-            shutil.copyfile(os.path.join(batch_original_path + '/E-FRET results', 'ED.tif'),
-                            os.path.join(output_dir, file_pre_new_name + "ED.tif"))
-            shutil.copyfile(os.path.join(batch_original_path + '/E-FRET results', 'moban.tif'),
-                            os.path.join(output_dir, file_pre_new_name + "MB.tif"))
-            shutil.copyfile(os.path.join(batch_original_path + '/E-FRET results', 'Rc.tif'),
-                            os.path.join(output_dir, file_pre_new_name + "RC.tif"))
+            if os.path.exists(os.path.join(batch_original_path + '/E-FRET results')) is True:
+                shutil.copyfile(os.path.join(batch_original_path + '/E-FRET results', 'ED.tif'),
+                                os.path.join(output_dir, file_pre_new_name + "ED.tif"))
+                shutil.copyfile(os.path.join(batch_original_path + '/E-FRET results', 'moban.tif'),
+                                os.path.join(output_dir, file_pre_new_name + "MB.tif"))
+                shutil.copyfile(os.path.join(batch_original_path + '/E-FRET results', 'Rc.tif'),
+                                os.path.join(output_dir, file_pre_new_name + "RC.tif"))
             # 寻找第一张明场图像进行数据加载预处理
             # 定义匹配规则
             pattern = r'^image_.*\.(tif)$'
@@ -54,6 +55,6 @@ def rename_and_copy_images(root_dir, output_dir, datatime, cell_line='None'):
 if __name__ == '__main__':
     # 调用函数并传入根目录和输出目录
     root_directory = 'C:/Users/22806/Downloads'
-    output_directory = 'C:/Users/2806/Downloads/images'
-    curr_datatime = '20240515'
+    output_directory = 'C:/Users/22806/Downloads/images'
+    curr_datatime = '20240616'
     rename_and_copy_images(root_directory, output_directory, datatime=curr_datatime, cell_line="Mcf7")

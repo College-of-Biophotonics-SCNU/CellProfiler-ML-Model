@@ -1,20 +1,15 @@
-import matplotlib.pyplot as plt
-import numpy as np
+import pandas as pd
 
-# 数据
-categories = ['Category1', 'Category2', 'Category3', 'Category4', 'Category5']
-values = [10, 15, 7, 19, 13]
+# 创建两个简单的DataFrame
+df1 = pd.DataFrame({'A': [1, 2]}, index=[0, 1])
+df2 = pd.DataFrame({'A': [3, 4]}, index=[1, 2])
 
-# 创建一个新的图形
-plt.figure(figsize=(10, 6))
+# 使用concat拼接，但不重置索引
+result1 = pd.concat([df1, df2])
+print("不重置索引:")
+print(result1)
 
-# 绘制柱状图
-plt.bar(categories, values)
-
-# 添加标题和轴标签
-plt.title('My Bar Chart')
-plt.xlabel('Categories')
-plt.ylabel('Values')
-
-# 显示图形
-plt.show()
+# 使用concat拼接，并重置索引
+result2 = pd.concat([df1, df2], ignore_index=True)
+print("\n重置索引:")
+print(result2)

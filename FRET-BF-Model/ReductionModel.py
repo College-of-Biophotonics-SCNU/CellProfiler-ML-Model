@@ -63,11 +63,11 @@ def filter_with_all_feature(pkl_name=None):
 
 
 class ReductionModel(DataloaderModel):
-    def __init__(self, metadata_file, data_name):
+    def __init__(self, metadata_file, data_name, labels_name=None):
         """
         降维算法
         """
-        super().__init__()
+        super().__init__(labels_name)
         # 获取单细胞特征，按照小时进行划分数据
         self.Parallel = Parallel()  # 加载线程池
         self.X_valid_feature = {}  # X的有效特征
@@ -140,14 +140,17 @@ class ReductionModel(DataloaderModel):
                     embedding = embeddings[(self.X['Metadata_hour'] == hour) & (self.X['Metadata_label'] == label), :]
                     print("{} hour {} label 的矩阵大小为 {}".format(hour, label, embedding.shape))
                     plt.scatter(embedding[:, 0], embedding[:, 1],
-                                label='{} hour {}'.format(hour, label),
+                                label='{} hour {}'.format(
+                                    hour,
+                                    self.labels_name[str(label)] if str(label) in self.labels_name else label
+                                ),
                                 color=colors[- color_key], alpha=1, s=50, edgecolors='none')
                     color_key += 1
             else:
                 print("{} label 的矩阵大小为 {}".format(label, embeddings.shape))
                 plt.scatter(embeddings[self.X['Metadata_label'] == label, 0],
                             embeddings[self.X['Metadata_label'] == label, 1],
-                            label=label,
+                            label=self.labels_name[str(label)] if str(label) in self.labels_name else label,
                             color=colors[- color_key], edgecolors='none')
                 color_key += 1
 
@@ -204,7 +207,8 @@ class ReductionModel(DataloaderModel):
                 # 绘制c=0的散点
                 color_key = 0
                 for label in self.labels:
-                    plt.scatter(embedding[y == label, 0], embedding[y == label, 1], label=label,
+                    plt.scatter(embedding[y == label, 0], embedding[y == label, 1],
+                                label=self.labels_name[str(label)] if str(label) in self.labels_name else label,
                                 color=colors[color_key],
                                 alpha=0.7,
                                 s=50,
@@ -222,13 +226,13 @@ class ReductionModel(DataloaderModel):
 
 
 class UMAPModel(ReductionModel):
-    def __init__(self, metadata_file, data_name):
-        super().__init__(metadata_file, data_name)
+    def __init__(self, metadata_file, data_name, labels_name=None):
+        super().__init__(metadata_file, data_name, labels_name)
 
 
 class TSNEModel(ReductionModel):
-    def __init__(self, metadata_file, data_name, scaler="StandardScaler"):
-        super().__init__(metadata_file, data_name)
+    def __init__(self, metadata_file, data_name, scaler="StandardScaler", labels_name=None):
+        super().__init__(metadata_file, data_name, labels_name)
         if scaler == "StandardScaler":
             self.scaler = StandardScaler()
         elif scaler == "MinMaxScaler":
@@ -241,10 +245,10 @@ class TSNEModel(ReductionModel):
 
 if __name__ == '__main__':
     model = TSNEModel([
-        '../data/2024515_BF_FRET_BFSingle.csv',
-        # '../data/2024515_BF_FRET_DDSingle.csv'
-    ], "20240515_BF")
-
+        ['../data/2024515_BF_FRET_BFSingle.csv', '../data/2024515_BF_FRET_DDSingle.csv'],
+    ],
+        data_name="20240515_BF",
+        labels_name={'0': 'drug', '1': 'control', '3': 'roi'})
     # 筛选合适的特征数据
     # model.screen_with_hour()
     model.filter_and_draw_all(hours=[2, 3, 4, 6], labels=[1], all_features=True)
