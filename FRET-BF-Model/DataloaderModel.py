@@ -28,7 +28,7 @@ class DataloaderModel:
                 merged_df = new_merged
                 continue
             else:
-                new_merged = new_merged.filter(regex='^(?!Metadata_)')
+                new_merged = new_merged.filter(regex='^(?!Metadata_)|(?!Granularity_)')
             merged_df = merged_df.merge(new_merged, on=['ImageNumber', 'ObjectNumber'])
         merged_df.drop(['ImageNumber', 'ObjectNumber'], axis=1, inplace=True)
         return merged_df
@@ -56,7 +56,7 @@ class DataloaderModel:
         print("总共具有{}种标签的数据, 分别是{}".format(len(self.labels), self.labels))
         return concat_df
 
-    def data_by_hour(self, metadata_file):
+    def data_by_hour(self, metadata_file, filter_regex=None):
         """
         根据时间进行数据的划分操作， 不划分X 和 y
         :return:
@@ -65,6 +65,8 @@ class DataloaderModel:
         self.X = merged_df.filter(regex='^(?!Metadata_)|Metadata_hour|Metadata_label')
         # 删除重复的列，只保留第一个出现的列
         self.X = self.X.loc[:, ~self.X.columns.duplicated()]
+        if filter_regex is not None:
+            self.X = self.X.filter(regex=filter_regex + "|Metadata_hour|Metadata_label")
         print("单细胞特征矩阵大小", self.X.shape)
 
 

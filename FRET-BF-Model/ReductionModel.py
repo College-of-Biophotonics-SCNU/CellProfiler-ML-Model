@@ -1,6 +1,7 @@
 import pickle
 
 import numpy as np
+import pandas as pd
 import umap
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
@@ -35,11 +36,16 @@ def feature_reduce(X, filter_rule, method_model="UMAP"):
         use_model = TSNE()
     else:
         use_model = umap.UMAP(n_neighbors=30, min_dist=0.1)
+
     # 对数值型特征进行拟合和转换
     if filter_rule is None:
         embedding = use_model.fit_transform(X)
     else:
-        embedding = use_model.fit_transform(X.filter(filter_rule))
+
+        X = X.filter(filter_rule)
+        print("处理细胞过滤操作，过滤的特征个数为", len(filter_rule), "，矩阵大小为", X.shape)
+        print("对应特征为", filter_rule)
+        embedding = use_model.fit_transform(X)
     return embedding
 
 
@@ -63,7 +69,7 @@ def filter_with_all_feature(pkl_name=None):
 
 
 class ReductionModel(DataloaderModel):
-    def __init__(self, metadata_file, data_name, labels_name=None):
+    def __init__(self, metadata_file, data_name, labels_name=None, filter_regex=None):
         """
         降维算法
         """
@@ -72,7 +78,7 @@ class ReductionModel(DataloaderModel):
         self.Parallel = Parallel()  # 加载线程池
         self.X_valid_feature = {}  # X的有效特征
         self.data_name = data_name  # 数据名称
-        self.data_by_hour(metadata_file)
+        self.data_by_hour(metadata_file, filter_regex)
 
     def screen_with_hour(self):
         """
@@ -93,7 +99,8 @@ class ReductionModel(DataloaderModel):
         with open("../data/features/" + self.data_name + "_features.pkl", 'wb') as f:
             pickle.dump(self.X_valid_feature, f)
 
-    def filter_and_draw_all(self, hour_labels=None, hours=None, labels=None, method_model="UMAP", all_features=False):
+    def filter_and_draw_all(self, hour_labels=None, hours=None, labels=None, method_model="UMAP",
+                            all_features=False, filter_regex=None):
         """
         获取特征的并集 实现所有小时的 UMAP 图像
         :param all_features: 是否引用所有的数据
@@ -101,6 +108,7 @@ class ReductionModel(DataloaderModel):
         :param labels: 进行降维的 labels 选择
         :param hours: 需要分析的时间
         :param hour_labels: 按照不同时间点划分 control 组
+        :param filter_regex: 正则化过滤不需要的特征
         :return:
         """
 
@@ -109,10 +117,10 @@ class ReductionModel(DataloaderModel):
         else:
             filter_rule = filter_with_all_feature("../data/features/" + self.data_name + "_features.pkl")
         # 定义颜色列表 选择一个颜色映射，例如 'tab20' 提供了20种区分度较好的颜色
-        cmap = getattr(plt.cm, 'tab20')
+        # cmap = getattr(plt.cm, 'tab20')
         # 生成12个颜色，因为颜色映射是连续的，我们需要将其离散化
-        colors = [cmap(i) for i in np.linspace(0, 1, 12)]
-        # colors = ['blue', 'Pink', 'red', 'green', 'Orange']
+        # colors = [cmap(i) for i in np.linspace(0, 1, 12)]
+        colors = ['blue', 'Pink', 'red', 'green', 'Orange']
         plt.figure(figsize=(10, 10))
         # 不输入值默认为 所有labels
         if labels is None:
@@ -125,9 +133,17 @@ class ReductionModel(DataloaderModel):
         color_key = 0
         # 进行降维分析
         X = self.X.drop(['Metadata_label', 'Metadata_hour'], axis=1)
+        # 过滤一些不需要的特征信息
+        if filter_regex is not None:
+            X = X.filter(regex=filter_regex).copy()
+        # 进行归一化操作
         if self.scaler is not None:
-            X = self.scaler.fit_transform(X)
-        embeddings = feature_reduce(X, filter_rule, method_model)
+            scaled_data = self.scaler.fit_transform(X)
+            scaled_df = pd.DataFrame(scaled_data, columns=X.columns)
+        else:
+            scaled_df = X
+        print("输入的单细胞特征矩阵大小为", scaled_df.shape)
+        embeddings = feature_reduce(scaled_df, filter_rule, method_model)
         print("降维后的数据大小为 ", embeddings.shape)
         for label in labels:
             # 判断是否是指定标签内的数据信息 进行按照时间进行划分
@@ -155,8 +171,10 @@ class ReductionModel(DataloaderModel):
                 color_key += 1
 
         plt.legend()
-        plt.savefig("../data/result/result_" + self.data_name + "_all_features_" + method_model +
+        plt.savefig("../data/result/result_" + self.data_name +
+                    "_model_" + method_model +
                     "_labels" + str(labels) +
+                    "_allF_" + str(all_features) +
                     "_hour_control" + str(hour_labels) + ".jpg")
         plt.show()
 
@@ -222,36 +240,58 @@ class ReductionModel(DataloaderModel):
         plt.tight_layout()
         plt.savefig("../data/result/result_" + self.data_name + "_hour_valid_features.jpg")
         # 显示图形
-        plt.show()
+        # plt.show()
 
 
 class UMAPModel(ReductionModel):
-    def __init__(self, metadata_file, data_name, labels_name=None):
-        super().__init__(metadata_file, data_name, labels_name)
-
-
-class TSNEModel(ReductionModel):
-    def __init__(self, metadata_file, data_name, scaler="StandardScaler", labels_name=None):
+    def __init__(self, metadata_file, data_name, scaler=None, labels_name=None):
         super().__init__(metadata_file, data_name, labels_name)
         if scaler == "StandardScaler":
             self.scaler = StandardScaler()
         elif scaler == "MinMaxScaler":
             self.scaler = MinMaxScaler()
 
-    def filter_and_draw_all(self, hour_labels=None, hours=None, labels=None, method_model="TSNE", all_features=False):
+
+class TSNEModel(ReductionModel):
+    def __init__(self, metadata_file, data_name, scaler="StandardScaler", labels_name=None, filter_regex=None):
+        super().__init__(metadata_file, data_name, labels_name, filter_regex)
+        if scaler == "StandardScaler":
+            self.scaler = StandardScaler()
+        elif scaler == "MinMaxScaler":
+            self.scaler = MinMaxScaler()
+
+    def filter_and_draw_all(self, hour_labels=None, hours=None, labels=None, method_model="TSNE",
+                            all_features=False, filter_regex=None):
         super().filter_and_draw_all(hour_labels=hour_labels, hours=hours, labels=labels,
-                                    method_model="TSNE", all_features=all_features)
+                                    method_model="TSNE", all_features=all_features, filter_regex=filter_regex)
 
 
 if __name__ == '__main__':
-    model = TSNEModel([
-        ['../data/2024515_BF_FRET_BFSingle.csv', '../data/2024515_BF_FRET_DDSingle.csv'],
+    # model = TSNEModel([
+    #     [
+    #         '../data/20240616_FRET_BF_Image_BFSingle.csv',
+    #         # '../data/2024616_FRET_BF_Image_DDSingle.csv'
+    #     ],
+    # ],
+    #     data_name="20240616_BF",
+    #     labels_name={'0': 'drug', '1': 'control', '3': 'roi'},
+    #     filter_regex="^AreaShape_"
+    # )
+
+    model = UMAPModel([
+        [
+            '../data/20240628_FRET_BF_Image_BFSingle_4h_Area.csv',
+            # '../data/2024616_FRET_BF_Image_DDSingle.csv'
+        ],
     ],
-        data_name="20240515_BF",
-        labels_name={'0': 'drug', '1': 'control', '3': 'roi'})
+        data_name="20240628_BF",
+        scaler="StandardScaler",
+        labels_name={'0': 'drug', '1': 'control', '3': 'roi'},
+    )
+
     # 筛选合适的特征数据
     # model.screen_with_hour()
-    model.filter_and_draw_all(hours=[2, 3, 4, 6], labels=[1], all_features=True)
+    model.filter_and_draw_all(hours=[4], all_features=True)
     # model.filter_and_draw_hour([2, 3, 4, 6])
 
     # 按照不同小时的FRET图像提取有效特征，进行降维分析

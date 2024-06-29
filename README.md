@@ -3,6 +3,9 @@ CellProfiler可以用于药物筛选，利用预先定义的手工特征进行�
 
 ![CellProfiler.png](data/images/CellProfiler.png)
 
+# 整体模型框架图
+![模型架构图](data/images/架构图.png)
+
 # 文件metadata的数据导出
 为了方便文件的读取，尤其是CellProfiler以及后续的深度网络计算，这里采用了文件命名的方式存储图像中的细节信息。
 如 **_clMcf7_exp20240515_h2_b2_ic1_cAA.tif _**，其对应含义如下：
@@ -130,31 +133,25 @@ CellProfiler采用了MaskImage模块。利用Muban的0-1区域图像屏蔽掉不
 ## 4.1 数据降维结果
 采用TSNE和UMAP算法进行操作进行分析分类
 ### 4.1.1 仅通过明场 BF 图像分析能够进行分类
-2-6小时对照组的明场图像降维分析结果
+- 我们分析了2-6小时对照组的明场图像降维分析结果
 
-![result_BF_control_TSNE](data/result_BF_control_TSNE.jpg)
+![result_BF_control_TSNE](data/result/result_BF_control_TSNE.jpg)
 
-2-6小时对照组和加药实验组的降维分析结果
-
-![result_BF_exp_control_UMAP](data/result_BF_exp_control_UMAP.jpg)
+- 我们分析了2-6小时对照组和加药实验组的降维分析结果
 
 ### 4.1.2 仅通过FRET图像分析能否进行分类
-FRET 图像在不同小时的分类划分情况，这里使用了每个小时的有效特征进行提取分析
+- FRET 图像在不同小时的分类划分情况，这里使用了每个小时的有效特征进行提取分析
 
-![result_FRET_UMAP](data/result_FRET_UMAP.jpg)
-
-我们将每个小时的有效特征进行提取获取有效特征的并集进行降维分类操作
-
-![result_FRET_feature_no_control_UMAP](data/result_FRET_feature_no_control_UMAP.jpg)
+- 我们将每个小时的有效特征进行提取获取有效特征的并集进行降维分类操作
 
 ## 4.2 数据分类结果
 采用KNN算法进行分析，首先是利用单独明场的特征查看数据能否较好的预测细胞状态，判断是不是加药的细胞
 
-![result_analysis_BF_feature_classify_by_label](data/result_analysis_BF_feature_classify_by_label.jpg)
+![result_analysis_BF_feature_classify_by_label](data/result/result_analysis_BF_feature_classify_by_label.jpg)
 
 其次，采用了明场加FRET图像的细胞特征进行预测细胞状态
 
-![result_analysis_BF_FRET_feature_classify_by_label](data/result_analysis_BF_FRET_feature_classify_by_label.jpg)
+![result_analysis_BF_FRET_feature_classify_by_label](data/result/result_analysis_BF_FRET_feature_classify_by_label.jpg)
 
 # 5. 算法讲解
 ## 5.1 UMAP 降维算法
