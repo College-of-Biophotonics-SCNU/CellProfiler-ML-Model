@@ -280,11 +280,11 @@ if __name__ == '__main__':
 
     model = UMAPModel([
         [
-            '../data/20240628_FRET_BF_Image_BFSingle_4h_Area.csv',
+            '../data/20240628_FRET_BF_Image_BFSingle_4h.csv',
             # '../data/2024616_FRET_BF_Image_DDSingle.csv'
         ],
     ],
-        data_name="20240628_BF",
+        data_name="20240628_BF_all",
         scaler="StandardScaler",
         labels_name={'0': 'drug', '1': 'control', '3': 'roi'},
     )

@@ -135,7 +135,7 @@ CellProfiler采用了MaskImage模块。利用Muban的0-1区域图像屏蔽掉不
 ### 4.1.1 仅通过明场 BF 图像分析能够进行分类
 - 我们分析了2-6小时对照组的明场图像降维分析结果
 
-![result_BF_control_TSNE](data/result/result_BF_control_TSNE.jpg)
+![result_BF_control_TSNE](data/result/FRET-BF/result_BF_control_TSNE.jpg)
 
 - 我们分析了2-6小时对照组和加药实验组的降维分析结果
 
@@ -147,11 +147,11 @@ CellProfiler采用了MaskImage模块。利用Muban的0-1区域图像屏蔽掉不
 ## 4.2 数据分类结果
 采用KNN算法进行分析，首先是利用单独明场的特征查看数据能否较好的预测细胞状态，判断是不是加药的细胞
 
-![result_analysis_BF_feature_classify_by_label](data/result/result_analysis_BF_feature_classify_by_label.jpg)
+![result_analysis_BF_feature_classify_by_label](data/result/FRET-BF/result_analysis_BF_feature_classify_by_label.jpg)
 
 其次，采用了明场加FRET图像的细胞特征进行预测细胞状态
 
-![result_analysis_BF_FRET_feature_classify_by_label](data/result/result_analysis_BF_FRET_feature_classify_by_label.jpg)
+![result_analysis_BF_FRET_feature_classify_by_label](data/result/FRET-BF/result_analysis_BF_FRET_feature_classify_by_label.jpg)
 
 # 5. 算法讲解
 ## 5.1 UMAP 降维算法

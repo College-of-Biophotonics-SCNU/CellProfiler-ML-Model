@@ -50,6 +50,6 @@ if __name__ == "__main__":
     # compare_valid_feature_setup("../data/20240515_fret_BF_feature_with_hour.pkl",
     #                             "../data/result_20240515_BF_fret_feature_setup.jpg")
     compare_valid_feature_setup("../data/20240515_fret_feature_with_hour.pkl",
-                                "../data/result/result_20240515_fret_feature_setup.jpg")
+                                "../data/result/FRET-BF/result_20240515_fret_feature_setup.jpg")
     # record_valid_feature("../data/20240515_fret_BF_feature_with_hour.pkl", "../data/20240515_BF_fret_features.csv")
 
