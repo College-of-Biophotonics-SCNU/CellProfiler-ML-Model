@@ -56,18 +56,18 @@ def modeling(filenames, labels):
                     alpha=0.7)
     plt.xlabel('UMAP 1')
     plt.ylabel('UMAP 2')
-    plt.title('UMAP projection of the Hoechst features')
+    plt.title('UMAP projection of the Hoechst Phenotypic features at 24h')
     plt.legend(loc='upper left', frameon=False)
-    plt.savefig("../data/result/Hoechst/UMAP.jpg")
+    plt.savefig("../data/result/Hoechst/UMAP_Hoechst_24h.jpg", dpi=400)
     plt.show()
 
 
 if __name__ == '__main__':
     modeling(
         [
-            '../data/features/HoechstFeatures/A1331852_nucleus.csv',
-            '../data/features/HoechstFeatures/ABT-199_nucleus.csv',
-            '../data/features/HoechstFeatures/control_nucleus.csv'
+            '../data/features/HoechstFeatures/A1331852_24h_nucleus.csv',
+            '../data/features/HoechstFeatures/ABT-199_24h_nucleus.csv',
+            '../data/features/HoechstFeatures/control_24h_nucleus.csv'
         ],
         [
             'A1331852',
