@@ -280,7 +280,7 @@ if __name__ == '__main__':
 
     model = UMAPModel([
         [
-            '../data/20240628_FRET_BF_Image_BFSingle_4h.csv',
+            '../data/features/FRET-BFFeatures/20240628_FRET_BF_Image_BFSingle_4h.csv',
             # '../data/2024616_FRET_BF_Image_DDSingle.csv'
         ],
     ],
